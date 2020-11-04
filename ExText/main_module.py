@@ -171,16 +171,12 @@ def CaculateAddress2Frame(h,w):
 #image5 = CropTextArea(crop,coordinate5, height5, width5)
 #image6 = CropTextArea(crop,coordinate6, height6, width6)
 
-
+config = Cfg.load_config_from_name('vgg_seq2seq')
+config['cnn']['pretrained']=False
+config['device'] = 'cuda:0'
+config['predictor']['beamsearch']=False
+detector = Predictor(config)
 def box2text(path):
-
-  config = Cfg.load_config_from_name('vgg_seq2seq')
-  config['cnn']['pretrained']=False
-  config['device'] = 'cuda:0'
-  config['predictor']['beamsearch']=False
-  
-  detector = Predictor(config)
-  
   img = Image.open(path)
   res = detector.predict(img)
   os.remove(path)
@@ -194,7 +190,7 @@ def check_enough_labels(labels):
   return(True)
 def Main(path):
     
-    model = torch.load("/home/tandanml/ML/ExtractInfor/DetectCMND3010")
+    model = torch.load("/home/tandanml/ML/ExtractInfor/ExText/DetectCMND311")
     image = np.asarray(bytearray(path.read()), dtype='uint8')
     image = cv2.imdecode(image,cv2.IMREAD_COLOR)
     imgName = str(path)
@@ -203,6 +199,7 @@ def Main(path):
     cv2.imwrite(imgName,image)
     image = utils.read_image(imgName)
     labels, boxes, scores = model.predict(image)
+    print(labels)
     if(check_enough_labels(labels)==False):
       return({
         'success':False,
